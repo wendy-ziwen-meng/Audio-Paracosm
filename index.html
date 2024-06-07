@@ -6,7 +6,7 @@
     <title>Unity WebGL Player | My project (1)</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-    <script src="https://webgazer.cs.brown.edu/webgazer.js" defer></script>
+    <script src="https://webgazer.cs.brown.edu/webgazer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <script src="heatmap.min.js"></script>
     <style>
@@ -62,10 +62,10 @@
     </div>
 
     <div class="buttons">
-      <button onclick="startCalibration()">Start Calibration</button>
-      <button onclick="startGazeTracking()">Start Gaze Tracking</button>
-      <button onclick="stopGazeTracking()">Stop Gaze Tracking</button>
-      <button onclick="downloadExcel()">Download Gaze Data</button>
+      <button id="startCalibrationBtn">Start Calibration</button>
+      <button id="startGazeTrackingBtn">Start Gaze Tracking</button>
+      <button id="stopGazeTrackingBtn">Stop Gaze Tracking</button>
+      <button id="downloadGazeDataBtn">Download Gaze Data</button>
     </div>
 
     <div id="calibration-container" class="calibration-container">
@@ -151,7 +151,13 @@
         container: document.body
       });
 
+      document.getElementById('startCalibrationBtn').addEventListener('click', startCalibration);
+      document.getElementById('startGazeTrackingBtn').addEventListener('click', startGazeTracking);
+      document.getElementById('stopGazeTrackingBtn').addEventListener('click', stopGazeTracking);
+      document.getElementById('downloadGazeDataBtn').addEventListener('click', downloadExcel);
+
       function startCalibration() {
+        console.log("Starting calibration...");
         calibrationContainer.style.display = 'flex';
         moveCalibrationPoint();
       }
@@ -164,6 +170,7 @@
           calibrationPoint.style.top = `${y}px`;
           calibrationPoints++;
         } else {
+          console.log("Calibration complete. Starting WebGazer...");
           calibrationContainer.style.display = 'none';
           calibrationPoints = 0;
           webgazer.begin();
@@ -171,16 +178,19 @@
       }
 
       calibrationPoint.addEventListener('click', function () {
+        console.log("Calibration point clicked");
         webgazer.addCalibrationPoint(calibrationPoint.style.left, calibrationPoint.style.top);
         moveCalibrationPoint();
       });
 
       function startGazeTracking() {
         if (!gazeTrackingStarted) {
+          console.log("Starting gaze tracking...");
           webgazer.setGazeListener((data, timestamp) => {
             if (data) {
               gazeData.push({ x: data.x, y: data.y, timestamp: timestamp });
               heatmapInstance.addData({ x: data.x, y: data.y, value: 1 });
+              console.log("Gaze data:", data.x, data.y);
             }
           }).begin();
           gazeTrackingStarted = true;
@@ -189,6 +199,7 @@
 
       function stopGazeTracking() {
         if (gazeTrackingStarted) {
+          console.log("Stopping gaze tracking...");
           webgazer.pause();
           gazeTrackingStarted = false;
         }
@@ -200,6 +211,7 @@
           return;
         }
 
+        console.log("Downloading gaze data...");
         const ws = XLSX.utils.json_to_sheet(gazeData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'GazeData');
