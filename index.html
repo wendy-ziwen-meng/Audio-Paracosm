@@ -124,10 +124,12 @@
 
       function startGazeTracking() {
         if (!gazeTrackingStarted) {
+          console.log("Starting gaze tracking...");
           webgazer.setGazeListener((data, timestamp) => {
             if (data) {
               gazeData.push({ x: data.x, y: data.y, timestamp: timestamp });
               heatmapInstance.addData({ x: data.x, y: data.y, value: 1 });
+              console.log("Gaze data:", data.x, data.y);
             }
           }).begin();
           gazeTrackingStarted = true;
@@ -136,6 +138,7 @@
 
       function stopGazeTracking() {
         if (gazeTrackingStarted) {
+          console.log("Stopping gaze tracking...");
           webgazer.pause();
           gazeTrackingStarted = false;
         }
